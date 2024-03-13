@@ -1,6 +1,6 @@
 # Hangman_game_assignment
 # 
-# Hangman is a fun word-guessing game you can play alone. You choose how hard you want it and pick a theme. Then, you try to guess the hidden word by suggesting letters. If you guess right, the letters appear. But if you guess wrong, part of a hangman is drawn. Be careful, because too many wrong guesses mean you lose! The difficulty level you choose determines how many wrong guesses you can make. It's a great way to improve your vocabulary and guessing skills. You can play with different themes like animals, movies, or countries, making it even more enjoyable. Hangman is an entertaining game suitable for players of all ages and skill levels.
+# Hangman offers a captivating solo word-guessing experience. Players select difficulty levels and themes, adding personalization. The game starts with a hidden word represented by dashes. Players guess letters to unveil the word, with correct guesses revealing positions. Each incorrect guess adds to a gallows or hangman's scaffold. Players set a limit for incorrect guesses based on difficulty. Success hinges on decoding the word within the limit. Hangman tests vocabulary and deductive skills, offering tailored challenges and themes for immersive gameplay.
 # Lovisha - Leader
 # Ojasvita - Developer
 # Nimarjot - Tester
