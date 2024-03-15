@@ -6,3 +6,4 @@
 # Nimarjot - Tester (23109907532)
 
 # Tester's review
+1 Add gui and make it an application in order to give a better interface to user and also add comments in the code for better understanding.
