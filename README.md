@@ -9,3 +9,4 @@
 1 Add gui and make it an application in order to give a better interface to user and also add comments in the code for better understanding.
 2 When numbers of guesses come to an end it  asks press yes to continue but if a user enters yeso/yeshi it understands it as yes rather than showing an error kindly check and correct this.
 3 Add genre to it also.
+All good no issues its all done
