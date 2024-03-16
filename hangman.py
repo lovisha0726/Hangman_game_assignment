@@ -2,6 +2,7 @@ import random
 import tkinter as tk
 from tkinter import messagebox
 
+# Hangman stages to display
 HANGMAN_STAGES = ['''
     +---+
          |
@@ -39,146 +40,104 @@ HANGMAN_STAGES = ['''
    / \  |
        ===''']
 
-easy_words = 'ant bat cat dog fox lion frog bear bird duck'.split()
-medium_words = 'monkey tiger camel zebra rhino elephant dolphin whale shark'.split()
-hard_words = 'penguin kangaroo cheetah giraffe hippopotamus crocodile chimpanzee gorilla'.split()
+# Lists of words for different difficulty levels
+easy_words = 'Bird Jump Desk Fish Cake Chair Plant House River Smile Cloud Paper Apple Happy Music Turtle Rabbit Garden Orange Window'.split()
+medium_words = 'Mango Rhino Puzzle Ocean Chair Coral Forest Castle Unicorn Diamond Wizard Mosaic Canyon Journey Crystal Desert Spirit Glacier Mystery Rainbow Miracle'.split()
+hard_words = 'Planetarium Dimensional Democracy Algorithm Exquisite Tyrannosaur Octagonal Nucleotide Labyrinth Barricade Quasar Kaleidoscope Extraterrestrial Dystopian Paradoxical Phenomenon Obelisk Holographic Renaissance Infiltrate Bibliophile'.split()
 
 def chooseRandomWord(word_list):
     """
     Returns a random word from the provided list of words.
     """
-    index = random.randint(0, len(word_list) - 1)
-    return word_list[index]
+    return random.choice(word_list)
 
-def displayBoard(missed_letters, correct_letters, secret_word):
-    """
-    Display the Hangman stage, missed letters, and the current state of the secret word.
-    """
-    canvas.itemconfig(hangman_image, image=HANGMAN_STAGES[len(missed_letters)])
-    missed_label.config(text='Missed letters: ' + ' '.join(missed_letters))
-    blanks = '_' * len(secret_word)
-    for i in range(len(secret_word)):
-        if secret_word[i] in correct_letters:
-            blanks = blanks[:i] + secret_word[i] + blanks[i+1:]
-    word_label.config(text=blanks)
+def displayBoard():
+    # Clear the canvas
+    hangman_canvas.delete("all")
+    # Display game elements on the canvas
+    hangman_canvas.create_text(200, 20, text="HANGMAN", font=('Helvetica', 20, 'bold'), fill='black')
+    hangman_canvas.create_text(200, 50, text='Missed letters: ' + ' '.join(missed_letters), font=('Helvetica', 12), fill='black')
+    # Display the current state of the word being guessed
+    word_display = ' '.join(letter if letter.lower() in correct_letters else '_' for letter in secret_word)
+    hangman_canvas.create_text(200, 100, text=word_display, font=('Helvetica', 16), fill='black')
+    # Display the hangman stage based on the number of missed letters
+    hangman_canvas.create_text(200, 150, text=HANGMAN_STAGES[len(missed_letters)], font=('Courier', 12), anchor=tk.CENTER, fill='black')
 
-def getPlayerGuess(already_guessed):
-    """
-    Prompt the player to guess a letter.
-    Ensures the player enters a single letter and nothing else.
-    """
-    guess = entry.get().lower()
-    if len(guess) != 1:
-        messagebox.showinfo("Invalid Input", "Please enter only a single letter.")
-        return None
-    elif guess in already_guessed:
+def checkGuess():
+    global game_is_done
+    # Get the guess from the entry and convert it to lowercase
+    guess = guess_entry.get().lower()
+    if len(guess) != 1 or guess not in 'abcdefghijklmnopqrstuvwxyz':
+        messagebox.showerror("Invalid Guess", "Please enter a single letter from the alphabet.")
+    elif guess in missed_letters or guess in correct_letters:
         messagebox.showinfo("Already Guessed", "You have already guessed that letter. Please try again.")
-        return None
-    elif guess not in 'abcdefghijklmnopqrstuvwxyz':
-        messagebox.showinfo("Invalid Input", "Please enter a letter from the alphabet.")
-        return None
+    elif guess in secret_word.lower():  # Convert secret_word to lowercase for comparison
+        correct_letters.add(guess)
+        if set(secret_word.lower()) <= correct_letters:  # Convert secret_word to lowercase for comparison
+            messagebox.showinfo("Congratulations", "You guessed it!\nThe secret word is '{}'.".format(secret_word))
+            game_is_done = True
     else:
-        return guess
+        missed_letters.add(guess)
+        if len(missed_letters) == len(HANGMAN_STAGES) - 1:
+            messagebox.showinfo("Game Over", "You have run out of guesses!\nThe word was '{}'.".format(secret_word))
+            game_is_done = True
+    displayBoard()
+    guess_entry.delete(0, 'end')
 
-def selectDifficulty():
-    """
-    Allows the player to choose the game difficulty level.
-    """
-    difficulty = tk.Toplevel()
-    difficulty.title("Select Difficulty Level")
-    difficulty.geometry("200x100")
-
-    tk.Label(difficulty, text="Select difficulty level:").pack()
-    tk.Radiobutton(difficulty, text="Easy", value=1, command=lambda: select_difficulty(difficulty, 1)).pack()
-    tk.Radiobutton(difficulty, text="Medium", value=2, command=lambda: select_difficulty(difficulty, 2)).pack()
-    tk.Radiobutton(difficulty, text="Hard", value=3, command=lambda: select_difficulty(difficulty, 3)).pack()
-
-    difficulty.mainloop()
-
-def select_difficulty(difficulty, choice):
-    difficulty.destroy()
-    global words
-    if choice == 1:
-        words = easy_words
-    elif choice == 2:
-        words = medium_words
+def startGame():
+    global words, secret_word
+    if difficulty.get():
+        if difficulty.get() == "easy_words":
+            words = easy_words
+        elif difficulty.get() == "medium_words":
+            words = medium_words
+        elif difficulty.get() == "hard_words":
+            words = hard_words
+        secret_word = chooseRandomWord(words)
+        displayBoard()
     else:
-        words = hard_words
-    start_game()
+        messagebox.showerror("Error", "Please select a difficulty level.")
 
-def start_game():
-    global missed_letters, correct_letters, game_is_done, secret_word
+root = tk.Tk()
+root.title("Hangman Game")
+root.configure(bg='beige')  # Set background color to beige
 
-    # Initialize game variables
-    missed_letters = ''
-    correct_letters = ''
-    game_is_done = False
+# Create a canvas for displaying the game elements
+hangman_canvas = tk.Canvas(root, width=400, height=200, bg='beige')
+hangman_canvas.pack()
 
-    # Choose a random word from the selected word list
-    secret_word = chooseRandomWord(words)
+# Initialize variables
+missed_letters = set()
+correct_letters = set()
+difficulty = tk.StringVar()
+words = []
+secret_word = ''
+game_is_done = False
 
-    # Display the initial game state
-    displayBoard(missed_letters, correct_letters, secret_word)
+# Create GUI elements
+difficulty_label = tk.Label(root, text="Select difficulty level:", bg='beige')
+difficulty_label.pack()
 
-# Create the main window
-window = tk.Tk()
-window.title("Hangman")
+easy_button = tk.Radiobutton(root, text="Easy", variable=difficulty, value="easy_words", bg='beige')
+easy_button.pack()
 
-# Create a canvas to display the hangman image
-canvas = tk.Canvas(window, width=300, height=300)
-canvas.pack()
+medium_button = tk.Radiobutton(root, text="Medium", variable=difficulty, value="medium_words", bg='beige')
+medium_button.pack()
 
-# Create a label to display the missed letters
-missed_label = tk.Label(window, text='Missed letters: ')
-missed_label.pack()
+hard_button = tk.Radiobutton(root, text="Hard", variable=difficulty, value="hard_words", bg='beige')
+hard_button.pack()
 
-# Create a label to display the current state of the secret word
-word_label = tk.Label(window, text='')
-word_label.pack()
+start_button = tk.Button(root, text="Start Game", command=startGame, bg='beige')
+start_button.pack()
 
-# Create an entry field for the player to enter their guess
-entry = tk.Entry(window)
-entry.pack()
+guess_label = tk.Label(root, text="Enter your guess:", bg='beige')
+guess_label.pack()
 
-# Create a button to submit the player's guess
-submit_button = tk.Button(window, text="Submit", command=lambda: handle_guess())
+guess_entry = tk.Entry(root)
+guess_entry.pack()
+
+submit_button = tk.Button(root, text="Submit Guess", command=checkGuess, bg='beige')
 submit_button.pack()
 
-def handle_guess():
-    global missed_letters, correct_letters, game_is_done, secret_word
-
-    guess = getPlayerGuess(missed_letters + correct_letters)
-    if guess:
-        if guess in secret_word:
-            correct_letters += guess
-            if all(letter in correct_letters for letter in secret_word):
-                game_is_done = True
-        else:
-            missed_letters += guess
-            if len(missed_letters) == len(HANGMAN_STAGES) - 1:
-                game_is_done = True
-
-        # Update the game state
-        displayBoard(missed_letters, correct_letters, secret_word)
-
-        # Check if the game is over
-        if game_is_done:
-            if all(letter in correct_letters for letter in secret_word):
-                messagebox.showinfo("Game Over", "You win!")
-            else:
-                messagebox.showinfo("Game Over", "You lose. The word was " + secret_word)
-            if playAgain():
-                start_game()
-            else:
-                window.destroy()
-
-# Asks the player if they want to play again.
-def playAgain():
-    response = messagebox.askyesno("Play Again?", "Would you like to play again?")
-    return response
-
-# Select the difficulty level
-selectDifficulty()
-
-# Start the mainloop
-window.mainloop()
+# Start the tkinter event loop
+root.mainloop()
