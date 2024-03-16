@@ -40,10 +40,39 @@ HANGMAN_STAGES = ['''
    / \  |
        ===''']
 
-# Lists of words for different difficulty levels
-easy_words = 'Bird Jump Desk Fish Cake Chair Plant House River Smile Cloud Paper Apple Happy Music Turtle Rabbit Garden Orange Window'.split()
-medium_words = 'Mango Rhino Puzzle Ocean Chair Coral Forest Castle Unicorn Diamond Wizard Mosaic Canyon Journey Crystal Desert Spirit Glacier Mystery Rainbow Miracle'.split()
-hard_words = 'Planetarium Dimensional Democracy Algorithm Exquisite Tyrannosaur Octagonal Nucleotide Labyrinth Barricade Quasar Kaleidoscope Extraterrestrial Dystopian Paradoxical Phenomenon Obelisk Holographic Renaissance Infiltrate Bibliophile'.split()
+# Define words for each genre and difficulty level
+genre_words = {
+    "food": {
+        "easy": ['Pizza', 'Burger', 'Salad', 'Pasta', 'Soup', 'Fries', 'Sushi', 'Taco', 'Cake', 'Pie', 'Bread', 'Cheese', 'Cookie', 'Donut', 'Apple'],
+        "medium": ['Lasagna', 'Sausage', 'Sandwich', 'Dumpling', 'Spaghetti', 'Burrito', 'Popcorn', 'Pancake', 'Muffin', 'Noodle', 'Broccoli', 'Waffle', 'Avocado', 'Croissant', 'Churro'],
+        "hard": ['Cappuccino', 'Bruschetta', 'Guacamole', 'Cupcake', 'Quiche', 'Pineapple', 'Artichoke', 'Cannoli', 'Gelato', 'Macaroni', 'Ceviche', 'Kimchi', 'Sorbet', 'Tiramisu', 'Meringue']
+    },
+    "country": {
+        "easy": ['USA', 'UK', 'Japan', 'China', 'India', 'France', 'Canada', 'Brazil', 'Germany', 'Italy', 'Spain', 'Russia', 'Mexico', 'Australia', 'Egypt'],
+        "medium": ['Argentina', 'Thailand', 'Greece', 'Sweden', 'Turkey', 'Nigeria', 'Norway', 'Netherlands', 'Belgium', 'Portugal', 'Vietnam', 'South Africa', 'Morocco', 'Pakistan', 'Philippines'],
+        "hard": ['Singapore', 'Switzerland', 'Indonesia', 'Austria', 'Denmark', 'Ireland', 'Finland', 'New Zealand', 'Iran', 'Malaysia', 'Chile', 'Peru', 'Israel', 'Saudi Arabia', 'Hungary']
+    },
+    "animal": {
+        "easy": ['Cat', 'Dog', 'Fish', 'Bird', 'Lion', 'Tiger', 'Bear', 'Rabbit', 'Deer', 'Horse', 'Cow', 'Pig', 'Goat', 'Duck', 'Sheep'],
+        "medium": ['Elephant', 'Giraffe', 'Monkey', 'Kangaroo', 'Penguin', 'Zebra', 'Raccoon', 'Koala', 'Squirrel', 'Hippo', 'Crocodile', 'Ostrich', 'Gorilla', 'Panda', 'Rhino'],
+        "hard": ['Chimpanzee', 'Koala', 'Orangutan', 'Porcupine', 'Meerkat', 'Platypus', 'Armadillo', 'Aardvark', 'Hyena', 'Komodo Dragon', 'Sloth', 'Tapir', 'Fossa', 'Marmoset', 'Manatee']
+    },
+    "technology": {
+        "easy": ['Computer', 'Phone', 'Mouse', 'Keyboard', 'Tablet', 'Printer', 'Monitor', 'Laptop', 'Speaker', 'Headphones', 'Camera', 'Charger', 'Cable', 'Battery', 'Router'],
+        "medium": ['Smartwatch', 'Microphone', 'Scanner', 'Projector', 'Drone', 'Satellite', 'Robot', 'GPS', 'Gadget', 'Processor', 'Database', 'Firewall', 'Software', 'Operating System', 'Internet'],
+        "hard": ['Augmented Reality', 'Virtual Reality', 'Artificial Intelligence', 'Quantum Computing', 'Blockchain', 'Cryptocurrency', 'Biometrics', 'Cybersecurity', 'Data Science', 'Machine Learning', 'Deep Learning', 'Neural Network', 'Algorithm', 'Encryption', 'IoT']
+    },
+    "sports": {
+        "easy": ['Football', 'Soccer', 'Basketball', 'Tennis', 'Golf', 'Baseball', 'Volleyball', 'Hockey', 'Rugby', 'Cricket', 'Boxing', 'Swimming', 'Cycling', 'Running', 'Skiing'],
+        "medium": ['Badminton', 'Table Tennis', 'Diving', 'Wrestling', 'Surfing', 'Gymnastics', 'Fencing', 'Rowing', 'Judo', 'Skateboarding', 'Handball', 'Archery', 'Squash', 'Triathlon', 'Weightlifting'],
+        "hard": ['Pole Vault', 'Bobsleigh', 'Synchronized Swimming', 'Water Polo', 'Taekwondo', 'Rhythmic Gymnastics', 'Ski Jumping', 'Biathlon', 'Luge', 'Skeleton', 'Equestrian', 'Modern Pentathlon', 'Canoe Slalom', 'Trampoline', 'Beach Volleyball']
+    },
+    "random": {
+        "easy": 'Bird Jump Desk Fish Cake Chair Plant House River Smile Cloud Paper Apple Happy Music Turtle Rabbit Garden Orange Window'.split(),
+        "medium": 'Mango Rhino Puzzle Ocean Chair Coral Forest Castle Unicorn Diamond Wizard Mosaic Canyon Journey Crystal Desert Spirit Glacier Mystery Rainbow Miracle'.split(),
+        "hard": 'Planetarium Dimensional Democracy Algorithm Exquisite Tyrannosaur Octagonal Nucleotide Labyrinth Barricade Quasar Kaleidoscope Extraterrestrial Dystopian Paradoxical Phenomenon Obelisk Holographic Renaissance Infiltrate Bibliophile'.split()
+    }
+}
 
 def chooseRandomWord(word_list):
     """
@@ -86,57 +115,74 @@ def checkGuess():
 
 def startGame():
     global words, secret_word
-    if difficulty.get():
-        if difficulty.get() == "easy_words":
-            words = easy_words
-        elif difficulty.get() == "medium_words":
-            words = medium_words
-        elif difficulty.get() == "hard_words":
-            words = hard_words
-        secret_word = chooseRandomWord(words)
-        displayBoard()
+    genre = genre_var.get()
+    difficulty_level = difficulty.get()
+    if genre and difficulty_level:
+        words = genre_words.get(genre, {}).get(difficulty_level, [])
+        if words:
+            secret_word = chooseRandomWord(words)
+            displayBoard()
+        else:
+            messagebox.showerror("Error", "No words found for the selected genre and difficulty level.")
     else:
-        messagebox.showerror("Error", "Please select a difficulty level.")
+        messagebox.showerror("Error", "Please select both a genre and a difficulty level.")
 
 root = tk.Tk()
 root.title("Hangman Game")
-root.configure(bg='beige')  # Set background color to beige
+root.configure(bg='#e3d9fc')  # Set background color to light lilac
 
 # Create a canvas for displaying the game elements
-hangman_canvas = tk.Canvas(root, width=400, height=200, bg='beige')
+hangman_canvas = tk.Canvas(root, width=400, height=200, bg='#e3d9fc')
 hangman_canvas.pack()
 
 # Initialize variables
 missed_letters = set()
 correct_letters = set()
 difficulty = tk.StringVar()
-words = []
-secret_word = ''
-game_is_done = False
+genre_var = tk.StringVar()
 
 # Create GUI elements
-difficulty_label = tk.Label(root, text="Select difficulty level:", bg='beige')
+difficulty_label = tk.Label(root, text="Select difficulty level:", bg='#e3d9fc')
 difficulty_label.pack()
 
-easy_button = tk.Radiobutton(root, text="Easy", variable=difficulty, value="easy_words", bg='beige')
+easy_button = tk.Radiobutton(root, text="Easy", variable=difficulty, value="easy", bg='#e3d9fc')
 easy_button.pack()
 
-medium_button = tk.Radiobutton(root, text="Medium", variable=difficulty, value="medium_words", bg='beige')
+medium_button = tk.Radiobutton(root, text="Medium", variable=difficulty, value="medium", bg='#e3d9fc')
 medium_button.pack()
 
-hard_button = tk.Radiobutton(root, text="Hard", variable=difficulty, value="hard_words", bg='beige')
+hard_button = tk.Radiobutton(root, text="Hard", variable=difficulty, value="hard", bg='#e3d9fc')
 hard_button.pack()
 
-start_button = tk.Button(root, text="Start Game", command=startGame, bg='beige')
+# Add space
+tk.Label(root, text="", bg='#e3d9fc').pack()
+
+# Label and Radiobuttons for selecting genre
+genre_label = tk.Label(root, text="Select genre:", bg='#e3d9fc')
+genre_label.pack()
+
+for genre in genre_words.keys():
+    tk.Radiobutton(root, text=genre.capitalize(), variable=genre_var, value=genre, bg='#e3d9fc').pack()
+
+# Add space
+tk.Label(root, text="", bg='#e3d9fc').pack()
+
+start_button = tk.Button(root, text="Start Game", command=startGame, bg='#e3d9fc')
 start_button.pack()
 
-guess_label = tk.Label(root, text="Enter your guess:", bg='beige')
+# Add space
+tk.Label(root, text="", bg='#e3d9fc').pack()
+
+guess_label = tk.Label(root, text="Enter your guess:", bg='#e3d9fc')
 guess_label.pack()
 
 guess_entry = tk.Entry(root)
 guess_entry.pack()
 
-submit_button = tk.Button(root, text="Submit Guess", command=checkGuess, bg='beige')
+# Add space
+tk.Label(root, text="", bg='#e3d9fc').pack()
+
+submit_button = tk.Button(root, text="Submit Guess", command=checkGuess, bg='#e3d9fc')
 submit_button.pack()
 
 # Start the tkinter event loop
