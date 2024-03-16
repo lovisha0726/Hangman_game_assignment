@@ -1,4 +1,6 @@
 import random
+import tkinter as tk
+from tkinter import messagebox
 
 HANGMAN_STAGES = ['''
     +---+
@@ -20,26 +22,26 @@ HANGMAN_STAGES = ['''
     O   |
    /|   |
         |
-       ===''', '''
+       ===''', r'''
     +---+
     O   |
    /|\  |
         |
-       ===''', '''
+       ===''', r'''
     +---+
     O   |
    /|\  |
    /    |
-       ===''', '''
+       ===''', r'''
     +---+
     O   |
    /|\  |
    / \  |
        ===''']
 
-easy_words = 'Bird Jump Desk Fish Cake Chair Plant House River Smile Cloud Paper Apple Happy Music Turtle Rabbit Garden Orange Window'.split()
-medium_words = 'Mango Rhino Puzzle Ocean Chair Coral Forest Castle Unicorn Diamond Wizard Mosaic Canyon Journey Crystal Desert Spirit Glacier Mystery Rainbow Miracle'.split()
-hard_words = 'Planetarium Dimensional Democracy Algorithm Exquisite Tyrannosaur Octagonal Nucleotide Labyrinth Barricade Quasar Kaleidoscope Extraterrestrial Dystopian Paradoxical Phenomenon Obelisk Holographic Renaissance Infiltrate Bibliophile'.split()
+easy_words = 'ant bat cat dog fox lion frog bear bird duck'.split()
+medium_words = 'monkey tiger camel zebra rhino elephant dolphin whale shark'.split()
+hard_words = 'penguin kangaroo cheetah giraffe hippopotamus crocodile chimpanzee gorilla'.split()
 
 def chooseRandomWord(word_list):
     """
@@ -49,104 +51,134 @@ def chooseRandomWord(word_list):
     return word_list[index]
 
 def displayBoard(missed_letters, correct_letters, secret_word):
-    print()
-    print(HANGMAN_STAGES[len(missed_letters)])
-    print()
-    print('Missed letters:', end=' ')
-    for letter in missed_letters:
-        print(letter, end=' ')
-    print()
+    """
+    Display the Hangman stage, missed letters, and the current state of the secret word.
+    """
+    canvas.itemconfig(hangman_image, image=HANGMAN_STAGES[len(missed_letters)])
+    missed_label.config(text='Missed letters: ' + ' '.join(missed_letters))
     blanks = '_' * len(secret_word)
     for i in range(len(secret_word)):
         if secret_word[i] in correct_letters:
             blanks = blanks[:i] + secret_word[i] + blanks[i+1:]
-    # Display the secret word with spaces between the letters:
-    for letter in blanks:
-        print(letter, end=' ')
-    print()
+    word_label.config(text=blanks)
 
 def getPlayerGuess(already_guessed):
     """
     Prompt the player to guess a letter.
     Ensures the player enters a single letter and nothing else.
     """
-    while True:
-        print('Please guess a letter:')
-        guess = input().lower()
-        if len(guess) != 1:
-            print('Please enter only a single letter.')
-        elif guess in already_guessed:
-            print('You have already guessed that letter. Please try again.')
-        elif guess not in 'abcdefghijklmnopqrstuvwxyz':
-            print('Please enter a letter from the alphabet.')
-        else:
-            return guess
+    guess = entry.get().lower()
+    if len(guess) != 1:
+        messagebox.showinfo("Invalid Input", "Please enter only a single letter.")
+        return None
+    elif guess in already_guessed:
+        messagebox.showinfo("Already Guessed", "You have already guessed that letter. Please try again.")
+        return None
+    elif guess not in 'abcdefghijklmnopqrstuvwxyz':
+        messagebox.showinfo("Invalid Input", "Please enter a letter from the alphabet.")
+        return None
+    else:
+        return guess
 
 def selectDifficulty():
     """
     Allows the player to choose the game difficulty level.
     """
-    while True:
-        print("Select difficulty level:")
-        print("1. Easy")
-        print("2. Medium")
-        print("3. Hard")
-        choice = input()
-        if choice in ['1', '2', '3']:
-            return int(choice)
-        else:
-            print("Invalid choice. Please select 1, 2, or 3.")
+    difficulty = tk.Toplevel()
+    difficulty.title("Select Difficulty Level")
+    difficulty.geometry("200x100")
 
-def playAgain():
-    """
-    Asks the player if they want to play again.
-    """
-    print('Would you like to play again? (yes/no)')
-    return input().lower().startswith('y')
+    tk.Label(difficulty, text="Select difficulty level:").pack()
+    tk.Radiobutton(difficulty, text="Easy", value=1, command=lambda: select_difficulty(difficulty, 1)).pack()
+    tk.Radiobutton(difficulty, text="Medium", value=2, command=lambda: select_difficulty(difficulty, 2)).pack()
+    tk.Radiobutton(difficulty, text="Hard", value=3, command=lambda: select_difficulty(difficulty, 3)).pack()
 
-print('|_H_A_N_G_M_A_N_|')
-missed_letters = ''
-correct_letters = ''
-difficulty = selectDifficulty()
-if difficulty == 1:
-    words = easy_words
-elif difficulty == 2:
-    words = medium_words
-else:
-    words = hard_words
+    difficulty.mainloop()
 
-secret_word = chooseRandomWord(words)
-game_is_done = False
-
-while True:
-    displayBoard(missed_letters, correct_letters, secret_word)
-    guess = getPlayerGuess(missed_letters + correct_letters)
-
-    if guess in secret_word:
-        correct_letters += guess
-        if all(letter in correct_letters for letter in secret_word):
-            print('You guessed it!')
-            print('The secret word is "' + secret_word + '". You win!')
-            game_is_done = True
+def select_difficulty(difficulty, choice):
+    difficulty.destroy()
+    global words
+    if choice == 1:
+        words = easy_words
+    elif choice == 2:
+        words = medium_words
     else:
-        missed_letters += guess
-        if len(missed_letters) == len(HANGMAN_STAGES) - 1:
-            displayBoard(missed_letters, correct_letters, secret_word)
-            print('You have run out of guesses!\nAfter ' + str(len(missed_letters)) + ' missed guesses and ' + str(len(correct_letters)) + ' correct guesses, the word was "' + secret_word + '".')
-            game_is_done = True
+        words = hard_words
+    start_game()
 
-    if game_is_done:
-        if playAgain():
-            missed_letters = ''
-            correct_letters = ''
-            game_is_done = False
-            difficulty = selectDifficulty()
-            if difficulty == 1:
-                words = easy_words
-            elif difficulty == 2:
-                words = medium_words
-            else:
-                words = hard_words
-            secret_word = chooseRandomWord(words)
+def start_game():
+    global missed_letters, correct_letters, game_is_done, secret_word
+
+    # Initialize game variables
+    missed_letters = ''
+    correct_letters = ''
+    game_is_done = False
+
+    # Choose a random word from the selected word list
+    secret_word = chooseRandomWord(words)
+
+    # Display the initial game state
+    displayBoard(missed_letters, correct_letters, secret_word)
+
+# Create the main window
+window = tk.Tk()
+window.title("Hangman")
+
+# Create a canvas to display the hangman image
+canvas = tk.Canvas(window, width=300, height=300)
+canvas.pack()
+
+# Create a label to display the missed letters
+missed_label = tk.Label(window, text='Missed letters: ')
+missed_label.pack()
+
+# Create a label to display the current state of the secret word
+word_label = tk.Label(window, text='')
+word_label.pack()
+
+# Create an entry field for the player to enter their guess
+entry = tk.Entry(window)
+entry.pack()
+
+# Create a button to submit the player's guess
+submit_button = tk.Button(window, text="Submit", command=lambda: handle_guess())
+submit_button.pack()
+
+def handle_guess():
+    global missed_letters, correct_letters, game_is_done, secret_word
+
+    guess = getPlayerGuess(missed_letters + correct_letters)
+    if guess:
+        if guess in secret_word:
+            correct_letters += guess
+            if all(letter in correct_letters for letter in secret_word):
+                game_is_done = True
         else:
-            break
+            missed_letters += guess
+            if len(missed_letters) == len(HANGMAN_STAGES) - 1:
+                game_is_done = True
+
+        # Update the game state
+        displayBoard(missed_letters, correct_letters, secret_word)
+
+        # Check if the game is over
+        if game_is_done:
+            if all(letter in correct_letters for letter in secret_word):
+                messagebox.showinfo("Game Over", "You win!")
+            else:
+                messagebox.showinfo("Game Over", "You lose. The word was " + secret_word)
+            if playAgain():
+                start_game()
+            else:
+                window.destroy()
+
+# Asks the player if they want to play again.
+def playAgain():
+    response = messagebox.askyesno("Play Again?", "Would you like to play again?")
+    return response
+
+# Select the difficulty level
+selectDifficulty()
+
+# Start the mainloop
+window.mainloop()
