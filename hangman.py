@@ -75,9 +75,7 @@ genre_words = {
 }
 
 def chooseRandomWord(word_list):
-    """
-    Returns a random word from the provided list of words.
-    """
+    #Returns a random word from the provided list of words.
     return random.choice(word_list)
 
 def displayBoard():
